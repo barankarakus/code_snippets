@@ -1,10 +1,10 @@
-- This document explains how Bash loads files upon starting up, which affect
-  its initialization. This is helpful to understand when we want to make
-  permanent changes to these initializaton settings, e.g. we want a particular
-  item to be in our PATH every time we fire up Bash. It's also helpful if we're
-  looking to clean up our PATH - if some application has polluted it, we can
-  use this knowledge to figure out how that application injected items onto our
-  $PATH, and thus how to reverse the mess.
+- This document explains how Bash loads files upon starting up *on MacOS*,
+  which affect its initialization. This is helpful to understand when we want
+  to make permanent changes to these initializaton settings, e.g. we want a
+  particular item to be in our PATH every time we fire up Bash. It's also
+  helpful if we're looking to clean up our PATH - if some application has
+  polluted it, we can use this knowledge to figure out how that application
+  injected items onto our $PATH, and thus how to reverse the mess.
 
 - Concept: Interactive vs Non-interactive invocation.
   Bash can be invoked as an interactive shell (i.e. where you have a
@@ -92,3 +92,8 @@
   head over to ~/.bash_profile. Of course, these initializations will be local
   to your particular user, but you're the only user in the system, anyway, so
   this is OK.
+
+- References::
+
+1) https://apple.stackexchange.com/questions/1486/where-are-bash-profile-startup-files
+2) http://www.softec.lu/site/DevelopersCorner/MasteringThePathHelper
