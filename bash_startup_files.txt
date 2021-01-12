@@ -34,13 +34,11 @@
             [ -r /etc/bashrc ] && . /etc/bashrc
     fi
 
-  (I believe) The first if condition tests the existence of the
+  The first if condition tests the existence of the
   /usr/libexec/path_helper executable and executes it if it does, and the
-  second if
-  condition tests if the BASH variable is set (in a Bash session, this'll
-  be
-  set to the path to the Bash executable, /usr/bin/bash), executing the
-  /etc/bashrc file if it exists and is readable.
+  second if condition tests if the BASH variable is set (in a Bash session,
+  this'll be set to the path to the Bash executable, /usr/bin/bash), executing
+  the /etc/bashrc file if it exists and is readable.
   Let's break each of these down:
 
   1. The path_helper utility reads the files /etc/paths and /etc/manpaths,
@@ -48,7 +46,7 @@
   respectively. Next, it searches for files in the directories /etc/paths.d
   and /etc/manpaths.d, appending their contents to the PATH and MANPATH
   environment variables. Specifically, the lines in these files are treated
-  as individual path elements to be added to (MAN)PATH
+  as individual path elements to be added to (MAN)PATH.
   So, to add stuff to PATH or MANPATH that should be reflected globally,
   simply head over to /etc/(man)paths.d and create a new file containing
   the path elements you want in separate lines. Don't modify /etc/(man)path
@@ -90,8 +88,8 @@
   
   Any initialization stuff that's more complicated than adding to (MAN)PATH:
   head over to ~/.bash_profile. Of course, these initializations will be local
-  to your particular user, but you're the only user in the system, anyway, so
-  this is OK.
+  to your particular user, but if you're the only user of the system then this
+  is OK.
 
 - References::
 
