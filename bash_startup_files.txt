@@ -1,0 +1,94 @@
+- This document explains how Bash loads files upon starting up, which affect
+  its initialization. This is helpful to understand when we want to make
+  permanent changes to these initializaton settings, e.g. we want a particular
+  item to be in our PATH every time we fire up Bash. It's also helpful if we're
+  looking to clean up our PATH - if some application has polluted it, we can
+  use this knowledge to figure out how that application injected items onto our
+  $PATH, and thus how to reverse the mess.
+
+- Concept: Interactive vs Non-interactive invocation.
+  Bash can be invoked as an interactive shell (i.e. where you have a
+  bleeping cursor, waiting for you to input commands...) or as a
+  non-interactive shell (e.g. executing 'bash <file>' is a non-interactive
+  invocation).
+
+- When invoked as an interactive shell, or as a non-interactive shell with
+  the --login option:
+  1. Bash reads and executes the /etc/profile file, if it exists.
+  2. Then, Bash looks for ~/.bash_profile, ~/.bash_login, and ~/.profile,
+  in that order. The first of these files that is found is then executed;
+  the remaining are ignored. 
+
+- Think of /etc/profile as doing a 'global' Bash initialization and the ~/*
+  files as doing some initialization work specific to the current user.
+
+- Don't modify /etc/profile (for one, it's a system file, so not meant to
+  be modified; you'll need sudo!). Instead, if wanting to set global
+  initialisation settings, let's first understand what's in /etc/profile:
+
+    if [ -x /usr/libexec/path_helper ]; then
+            eval `/usr/libexec/path_helper -s`
+    fi
+    
+    if [ "${BASH-no}" != "no" ]; then
+            [ -r /etc/bashrc ] && . /etc/bashrc
+    fi
+
+  (I believe) The first if condition tests the existence of the
+  /usr/libexec/path_helper executable and executes it if it does, and the
+  second if
+  condition tests if the BASH variable is set (in a Bash session, this'll
+  be
+  set to the path to the Bash executable, /usr/bin/bash), executing the
+  /etc/bashrc file if it exists and is readable.
+  Let's break each of these down:
+
+  1. The path_helper utility reads the files /etc/paths and /etc/manpaths,
+  adding their contents to the PATH and MANPATH environment variables,
+  respectively. Next, it searches for files in the directories /etc/paths.d
+  and /etc/manpaths.d, appending their contents to the PATH and MANPATH
+  environment variables. Specifically, the lines in these files are treated
+  as individual path elements to be added to (MAN)PATH
+  So, to add stuff to PATH or MANPATH that should be reflected globally,
+  simply head over to /etc/(man)paths.d and create a new file containing
+  the path elements you want in separate lines. Don't modify /etc/(man)path
+  since these are read-only.
+
+  2. The /etc/bashrc file is another file that should NOT be modified. Instead,
+  let's understand what's in it:
+
+    # System-wide .bashrc file for interactive bash(1) shells.
+    if [ -z "$PS1" ]; then
+       return
+    fi
+    
+    PS1='\h:\W \u\$ '
+    # Make bash check its window size after a process completes
+    shopt -s checkwinsize
+    
+    [ -r "/etc/bashrc_$TERM_PROGRAM" ] && . "/etc/bashrc_$TERM_PROGRAM"
+
+  Not sure what PS1 is, but I believe the if condition usually fails upon
+  startup.
+  So, what we end up having is that the /etc/bashrc_$TERM_PROGRAM file is
+  executed, if it exists and is readable. The TERM_PROGRAM variable is set to
+  whatever the terminal (emulator) is, e.g. it's "iTerm.app" in iTerminal.
+  I'm not sure if it's good practice to edit /etc/bashrc_$TERM_PROGRAM.
+
+- Best Practice:
+  
+  To add stuff to the (MAN)PATH globally, head over to /etc/(man)paths and add
+  a text file with each line containing an individual path element you'd like
+  to add. Alternatively, see the last tip.
+
+  DON'T edit /etc/profile or /etc/bashrc. I don't know if
+  /etc/bashrc_$TERM_PROGRAM is safe to edit (nor if you'd even want to edit it,
+  since surely you'd want your Bash initializations to apply to Bash in any
+  terminal (emulator), not just a specific one). Thus, when it comes to global
+  initializations, don't do anything complex: Just add stuff to (MAN)PATH as
+  described.
+  
+  Any initialization stuff that's more complicated than adding to (MAN)PATH:
+  head over to ~/.bash_profile. Of course, these initializations will be local
+  to your particular user, but you're the only user in the system, anyway, so
+  this is OK.
