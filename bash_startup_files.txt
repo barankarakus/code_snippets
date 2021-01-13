@@ -6,22 +6,30 @@
   polluted it, we can use this knowledge to figure out how that application
   injected items onto our $PATH, and thus how to reverse the mess.
 
-- Concept: Interactive vs Non-interactive invocation.
+- Concept: interactive vs non-interactive invocation.
   Bash can be invoked as an interactive shell (i.e. where you have a
   bleeping cursor, waiting for you to input commands...) or as a
   non-interactive shell (e.g. executing 'bash <file>' is a non-interactive
   invocation).
 
-- When invoked as an interactive shell, or as a non-interactive shell with
+- Concept: login vs non-login shell.
+  I'm not entirely clear on this distinction, but what's important to know is
+  that (by default) interactive shells in Bash are treated as login shells.
+  This is not the case for Linux and other Unix-like systems, which run
+  interactive, non-login shells by default.
+  Because of this behaviour (and because I use MacOS), we'll first cover how
+  Bash starts up for interactive login shells.
+  Note: It is possible to check whether a shell is a login shell by running
+  'shopt login_shell'.
+
+- When invoked as an interactive login shell, or as a non-interactive shell with
   the --login option:
   1. Bash reads and executes the /etc/profile file, if it exists.
   2. Then, Bash looks for ~/.bash_profile, ~/.bash_login, and ~/.profile,
   in that order. The first of these files that is found is then executed;
-  the remaining are ignored. 
-
+  the remaining are ignored.
 - Think of /etc/profile as doing a 'global' Bash initialization and the ~/*
   files as doing some initialization work specific to the current user.
-
 - Don't modify /etc/profile (for one, it's a system file, so not meant to
   be modified; you'll need sudo!). Instead, if wanting to set global
   initialisation settings, let's first understand what's in /etc/profile:
@@ -73,7 +81,8 @@
   whatever the terminal (emulator) is, e.g. it's "iTerm.app" in iTerminal.
   I'm not sure if it's good practice to edit /etc/bashrc_$TERM_PROGRAM.
 
-- Best Practice:
+- Best Practice for modifying the initialization of interactive (login) Bash
+  shells:
   
   To add stuff to the (MAN)PATH globally, head over to /etc/(man)paths and add
   a text file with each line containing an individual path element you'd like
@@ -91,7 +100,34 @@
   to your particular user, but if you're the only user of the system then this
   is OK.
 
+- When invoked as an interactive non-login shell, Bash reads and executes ~/.bashrc, if it exists.
+  According to the GNU manual (see reference 3)), typically the ~/.bash_profile
+  sources ~/.bashrc (if it exists), either at the end or the beginning of the
+  file, after or before any login-specific initializations. The MacOS default
+  ~/.bash_profile doesn't do this - I'm guessing because interactive non-login
+  shells aren't the default - but it might be a good idea to do the following:
+
+    1. Make ~/.bash_profile source ~/.bashrc (if it exists, i.e. using the line
+    'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi').
+    2. Place initialization code in ~/.bashrc rather than ~/.bash_profile.
+
+    This ensures consistency with other Unix-like systems (which tend to place
+    initialization settings in ~/.bashrc since interactive non-login shells are
+    the default).
+
+- When invoked non-interactively, Bash looks for the variable BASH_ENV in the
+  environment, using its value as the name of a file to read and execute (but
+  note that the value of PATH is not used to search for the filename).
+  On my Mac, BASH_ENV is not set to anything by default.
+  Placing the single line 'env' in a file 'script' and executing 'bash script'
+  at the command-line, we see that, indeed, a non-interactive shell has a very
+  minimal initialisation. I see just 5 or so environment variables, all of
+  which are set by the Terminal.
+  Reminder: A non-interactive shell can be initialized in the same way as an
+  interactive login shell by passing the --login option.
+
 - References::
 
 1) https://apple.stackexchange.com/questions/1486/where-are-bash-profile-startup-files
 2) http://www.softec.lu/site/DevelopersCorner/MasteringThePathHelper
+3) https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html
