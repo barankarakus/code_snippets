@@ -14,9 +14,12 @@
 
 - Concept: login vs non-login shell.
   I'm not entirely clear on this distinction, but what's important to know is
-  that (by default) interactive shells in Bash are treated as login shells.
+  that (by default on Mac) interactive shells are treated as login shells, when
+  launched using the default Terminal (the same applies to iTerm).
   This is not the case for Linux and other Unix-like systems, which run
   interactive, non-login shells by default.
+  Here's an example of a non-login shell: A shell process launched from
+  another shell process, e.g. typing 'bash' from an interactive bash session.
   Because of this behaviour (and because I use MacOS), we'll first cover how
   Bash starts up for interactive login shells.
   Note: It is possible to check whether a shell is a login shell by running
@@ -78,8 +81,11 @@
   startup.
   So, what we end up having is that the /etc/bashrc_$TERM_PROGRAM file is
   executed, if it exists and is readable. The TERM_PROGRAM variable is set to
-  whatever the terminal (emulator) is, e.g. it's "iTerm.app" in iTerminal.
-  I'm not sure if it's good practice to edit /etc/bashrc_$TERM_PROGRAM.
+  whatever the terminal (emulator) is, e.g. it's "iTerm.app" in iTerminal and
+  "Apple_Terminal" in the default MacOS Terminal.
+  Don't edit the /etc/bashrc_$TERM_PROGRAM files. I think they're there for
+  terminal emulator-specific set-up details - NOT for us to throw in any
+  customisation.
 
 - Best Practice for modifying the initialization of interactive (login) Bash
   shells:
